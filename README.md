@@ -63,6 +63,15 @@ pip install opencv-python dlib imutils numpy
 
 ## ▶️ Run the Project
 
+### 📥 Clone the Repository:
+
+```bash
+git clone https://github.com/pbhalange/Drowsiness-Detection-System.git
+cd Drowsiness-Detection-System\
+```
+
+---
+
 ```bash
 python main.py
 ```
@@ -84,7 +93,7 @@ You can tweak the detection sensitivity by changing these values inside `main.py
 ---
 
 
-## 🙌 Credits
+## Credits
 
 - Dlib's [68-point facial landmark model](http://dlib.net/files/)
 - OpenCV for image processing
