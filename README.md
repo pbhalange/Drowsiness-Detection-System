@@ -31,9 +31,11 @@ This project implements a **real-time eye monitoring system** to detect **blinks
    - EAR drops below a certain threshold ➝ considered a **blink**  
    - EAR remains low across several frames ➝ **drowsy alert** is triggered
 
-5. **📺 Real-time Display**  
+5. **📺 Real-time Display & Alert**  
    - Draws contours around eyes  
    - Displays status messages like "You are blinking." or "You are drowsy!"
+   - If the user's eyes remain closed for 10 seconds or more, the system triggers a looping alert  
+     sound to warn the user.
 
 6. **❌ Exit Option**  
    Press `q` to gracefully exit the application.
@@ -44,6 +46,8 @@ This project implements a **real-time eye monitoring system** to detect **blinks
 
 ```
 Drowsiness Detection System/
+    ├── Alert/
+    |   └──alert.wav
     ├── Dataset/
     │   └── shape_predictor_68_face_landmarks.dat   # Pre-trained model for facial landmarks
     └── main.py                                     # Main detection script

@@ -3,6 +3,9 @@ import dlib
 import numpy as np
 from math import sqrt
 from imutils import face_utils
+import time
+import pygame
+
 
 # Constants
 MIN_EAR = 0.2
@@ -11,6 +14,9 @@ MAX_DROWSY_FRAMES = 35
 
 LEFT_EYE_INDICES = list(range(36, 42))
 RIGHT_EYE_INDICES = list(range(42, 48))
+
+
+pygame.mixer.init()
 
 
 def distance(pt1, pt2):
@@ -44,13 +50,18 @@ def show_text(frame, text, position, color, scale=1.2, thickness=2):
         scale, color, thickness, cv2.LINE_AA
     )
 
+# def play_alert():
+    
+#     pygame.mixer.music.load("Alert/alert.wav")  
+#     pygame.mixer.music.play()
 
 def main():
     cap = cv2.VideoCapture(0)
     detector = dlib.get_frontal_face_detector()
     predictor = dlib.shape_predictor("./Dataset/shape_predictor_68_face_landmarks.dat")
 
-    drowsy_count = 0
+    drowsy_start_time = None
+    alert_playing = False
 
     while True:
         ret, frame = cap.read()
@@ -68,24 +79,37 @@ def main():
             draw_eye_contours(frame, landmarks)
 
             if avg_ear < MIN_EAR:
-                show_text(frame, "You are blinking.", (50, 100), (0, 0, 255))
+                show_text(frame, "You are blinking.", (10, 100), (0, 0, 255), scale=1)
 
             if avg_ear < MIN_DROWSY_EAR:
-                drowsy_count += 1
+                if drowsy_start_time is None:
+                    drowsy_start_time = time.time()
+                else:
+                    elapsed = time.time() - drowsy_start_time
+                    if elapsed >= 10:  # Eye closed for 10+ seconds
+                        show_text(frame, "You are drowsy!", (10, 400), (255, 0, 0), scale=1, thickness=2)
+                        if not alert_playing:
+                            pygame.mixer.music.load("Alert/alert.wav")
+                            pygame.mixer.music.play(-1)  # Loop indefinitely
+                            alert_playing = True
             else:
-                drowsy_count = 0
+                drowsy_start_time = None
+                if alert_playing:
+                    pygame.mixer.music.stop()
+                    alert_playing = False
 
-            if drowsy_count > MAX_DROWSY_FRAMES:
-                show_text(frame, "You are drowsy!", (50, 400), (255, 0, 0), scale=1.5, thickness=3)
-                drowsy_count = 0
+            show_text(frame, f"EAR: {avg_ear:.2f}", (10, 60), (255, 255, 0), scale=0.7, thickness=1)
 
         cv2.imshow("Drowsiness Detection", frame)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        key = cv2.waitKey(1) & 0xFF
+        if key == ord('q') or cv2.getWindowProperty("Drowsiness Detection", cv2.WND_PROP_VISIBLE) < 1:
             break
 
     cap.release()
+    pygame.mixer.music.stop()
     cv2.destroyAllWindows()
+
 
 
 if __name__ == "__main__":
